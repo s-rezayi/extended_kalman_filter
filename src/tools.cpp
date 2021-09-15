@@ -4,8 +4,6 @@
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using std::vector;
-using std::cout;
-using std::endl;
 
 Tools::Tools() {}
 
@@ -21,7 +19,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
   //  * the estimation vector size should equal ground truth vector size
   if (estimations.size() != ground_truth.size()
       || estimations.size() == 0) {
-    cout << "Invalid estimation or ground_truth data" << endl;
+    // cout << "Invalid estimation or ground_truth data" << endl;
     return rmse;
   }
 
@@ -57,10 +55,9 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   float c1 = px*px+py*py;
   
   // check division by zero  
-  if (fabs(c1) < 0.0001) {
-    px = 0.0001;
-    py = 0.0001;
-    c1 = px*px+py*py;
+  if (fabs(c1) < 0.0001) 
+  {
+    c1 = 0.0001;
   }
   
   float c2 = sqrt(c1);

@@ -1,6 +1,5 @@
 #include "FusionEKF.h"
 #include <iostream>
-#include <cmath>
 #include "Eigen/Dense"
 #include "tools.h"
 
@@ -40,11 +39,7 @@ FusionEKF::FusionEKF() {
 
   // ekf_.x_ = VectorXd(4);
 
-  ekf_.P_ = MatrixXd(4, 4);
-  ekf_.P_ << 1.0, 0.0, 0.0, 0.0,
-        	 0.0, 1.0, 0.0, 0.0,
-        	 0.0, 0.0, 1000.0, 0.0,
-        	 0.0, 0.0, 0.0, 1000.0;
+
 
   H_laser_ << 1.0, 0, 0, 0,
               0, 1.0, 0, 0;
@@ -83,62 +78,70 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.x_ = VectorXd(4);
     ekf_.x_ << 1.0, 1.0, 1.0, 1.0;
 
+    ekf_.P_ = MatrixXd(4, 4);
+    ekf_.P_ << 1.0, 0.0, 0.0, 0.0,
+        	     0.0, 1.0, 0.0, 0.0,
+        	     0.0, 0.0, 1000.0, 0.0,
+        	     0.0, 0.0, 0.0, 1000.0;
+
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       float rho = measurement_pack.raw_measurements_[0];
       float phi = measurement_pack.raw_measurements_[1];
       float rho_dot = measurement_pack.raw_measurements_[2];
 
       //normalizing phi
-      while(phi > M_PI){
-        phi -= 2 * M_PI;
-      }
-      while(phi < -M_PI){
-        phi += 2 * M_PI;
-      }
+      // while(phi > M_PI){
+      //   phi -= 2 * M_PI;
+      // }
+      // while(phi < -M_PI){
+      //   phi += 2 * M_PI;
+      // }
       
       float px_radar = rho * cos(phi);
       float py_radar = rho * sin(phi);
       float vx_radar = rho_dot * cos(phi);
       float vy_radar = rho_dot * sin(phi);
       
-      if(px_radar < 0.0001)
-      {
-        px_radar = 0.0001;
-      }
+      // if(px_radar < 0.0001)
+      // {
+      //   px_radar = 0.0001;
+      // }
       
-      if(py_radar < 0.0001)
-      {
-        py_radar = 0.0001;
-      }
+      // if(py_radar < 0.0001)
+      // {
+      //   py_radar = 0.0001;
+      // }
       
-      if(vx_radar < 0.0001)
-      {
-        vx_radar = 0.0001;
-      }
+      // if(vx_radar < 0.0001)
+      // {
+      //   vx_radar = 0.0001;
+      // }
       
-      if(vy_radar < 0.0001)
-      {
-        vy_radar = 0.0001;
-      }
+      // if(vy_radar < 0.0001)
+      // {
+      //   vy_radar = 0.0001;
+      // }
 
       ekf_.x_ << px_radar, py_radar, vx_radar, vy_radar;
+      previous_timestamp_ = measurement_pack.timestamp_;
 
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       float px_laser = measurement_pack.raw_measurements_[0];
       float py_laser = measurement_pack.raw_measurements_[1];
       
-      if(px_laser < 0.0001)
-      {
-        px_laser = 0.0001;
-      }
+      // if(px_laser < 0.0001)
+      // {
+      //   px_laser = 0.0001;
+      // }
       
-      if(py_laser < 0.0001)
-      {
-        py_laser = 0.0001;
-      }
+      // if(py_laser < 0.0001)
+      // {
+      //   py_laser = 0.0001;
+      // }
       
       ekf_.x_ << px_laser, py_laser, 0, 0;
+      previous_timestamp_ = measurement_pack.timestamp_;
     }
 
     // done initializing, no need to predict or update
